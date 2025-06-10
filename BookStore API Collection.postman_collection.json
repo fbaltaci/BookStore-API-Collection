@@ -1,0 +1,253 @@
+{
+	"info": {
+		"_postman_id": "7fa057f8-b985-4bdf-96c0-400055a97e2f",
+		"name": "BookStore API Collection",
+		"description": "Postman collection to test ToolsQA BookStore API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24777756"
+	},
+	"item": [
+		{
+			"name": "User Authentication",
+			"item": [
+				{
+					"name": "Create User (Valid)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+									"pm.test(\"Response contains userID\", () => {",
+									"    const res = pm.response.json();",
+									"",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"",
+									"    pm.collectionVariables.set(\"userName\", requestBody.userName);",
+									"    pm.collectionVariables.set(\"password\", requestBody.password);",
+									"",
+									"    pm.expect(res.userID).to.be.a('string');",
+									"    pm.collectionVariables.set(\"userID\", res.userID);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"fhemifehmi1\",\n  \"password\": \"fhemifehmi1!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/Account/v1/User",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Account",
+								"v1",
+								"User"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Token (Valid)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has a valid token\", () => {",
+									"    const res = pm.response.json();",
+									"    pm.expect(res.token).to.be.a('string');",
+									"    pm.collectionVariables.set(\"token\", res.token);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": {{userName}},\n  \"password\": {{password}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/Account/v1/GenerateToken",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Account",
+								"v1",
+								"GenerateToken"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Authorize User with Valid Credentials (Invalid)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userName\": \"fbaltaci_test5\",\r\n  \"password\": \"Fbaltaci_test5!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Account/v1/Authorized",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Account",
+								"v1",
+								"Authorized"
+							]
+						},
+						"description": "Generated from cURL: curl --location 'https://bookstore.toolsqa.com/Account/v1/Authorized' \\\r\n--header 'accept: application/json' \\\r\n--header 'Content-Type: application/json' \\\r\n--data '{\r\n  \"userName\": \"fbaltaci_test5\",\r\n  \"password\": \"Fbaltaci_test5!\"\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User with Valid Token",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "https://bookstore.toolsqa.com/Account/v1/User/{{userID}}",
+							"protocol": "https",
+							"host": [
+								"bookstore",
+								"toolsqa",
+								"com"
+							],
+							"path": [
+								"Account",
+								"v1",
+								"User",
+								"{{userID}}"
+							]
+						},
+						"description": "Generated from cURL: curl --location --request DELETE 'https://bookstore.toolsqa.com/Account/v1/User/58f73de5-aea0-4dd0-b346-2c8d47620147' \\\r\n--header 'accept: application/json' \\\r\n--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImZiYWx0YWNpX3Rlc3QzIiwicGFzc3dvcmQiOiJmYmFsdGFjaV90ZXN0MyEiLCJpYXQiOjE3NDg0NDM3NDh9.-bjO7O9RCVAACYoK7j37WvB-B-5HkFxxMqbeUnYgzFA'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Book Operations",
+			"item": [
+				{
+					"name": "Get All Books",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+									"const books = pm.response.json().books || [];",
+									"pm.test(\"Books list is not empty\", () => pm.expect(books.length).to.be.above(0));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/BookStore/v1/Books",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"BookStore",
+								"v1",
+								"Books"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://bookstore.toolsqa.com"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "userID",
+			"value": ""
+		},
+		{
+			"key": "userName",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		}
+	]
+}
