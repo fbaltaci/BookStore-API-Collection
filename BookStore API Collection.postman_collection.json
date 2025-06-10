@@ -1070,21 +1070,414 @@
 				},
 				{
 					"name": "Fail to create a user with a password missing non-alphanumeric character",
-					"item": []
+					"item": [
+						{
+							"name": "Create User (With Invalid Password)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));",
+											"",
+											"const res = pm.response.json();",
+											"",
+											"pm.test(\"Password policy error structure is valid\", () => {",
+											"    pm.expect(res).to.have.property(\"code\", \"1300\");",
+											"",
+											"    pm.expect(res).to.have.property(\"message\");",
+											"    pm.expect(res.message).to.include(\"Passwords must have\");",
+											"    pm.expect(res.message.length).to.be.greaterThan(50); // Optional: message length check",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"TestPassword\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "Fail to create a user with an already existing username",
-					"item": []
+					"item": [
+						{
+							"name": "Create User With Existing's Username and Pwd",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 406\", () => pm.response.to.have.status(406));",
+											"",
+											"const res = pm.response.json();",
+											"",
+											"pm.test(\"User already exists error is returned\", () => {",
+											"    pm.expect(res).to.have.property(\"code\", \"1204\");",
+											"    pm.expect(res).to.have.property(\"message\", \"User exists!\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"TestTheSameUsername\",\n  \"password\": \"TestTheSamePassword1!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "Fail to generate a token with missing password",
-					"item": []
+					"item": [
+						{
+							"name": "Create User (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+											"pm.test(\"Response contains userID\", () => {",
+											"    const res = pm.response.json();",
+											"",
+											"    const requestBody = JSON.parse(pm.request.body.raw);",
+											"",
+											"    pm.collectionVariables.set(\"userName\", requestBody.userName);",
+											"    pm.collectionVariables.set(\"password\", requestBody.password);",
+											"",
+											"    pm.expect(res.userID).to.be.a('string');",
+											"    pm.collectionVariables.set(\"userID\", res.userID);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Generate Token (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", () => {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"const res = pm.response.json();",
+											"",
+											"pm.test(\"Missing username and password error is returned\", () => {",
+											"    pm.expect(res).to.have.property(\"code\", \"1200\");",
+											"    pm.expect(res).to.have.property(\"message\", \"UserName and Password required.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\"\n    //   Missing Password\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/GenerateToken",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"GenerateToken"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "Fail to generate a token with missing username",
-					"item": []
+					"item": [
+						{
+							"name": "Create User (Valid) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+											"pm.test(\"Response contains userID\", () => {",
+											"    const res = pm.response.json();",
+											"",
+											"    const requestBody = JSON.parse(pm.request.body.raw);",
+											"",
+											"    pm.collectionVariables.set(\"userName\", requestBody.userName);",
+											"    pm.collectionVariables.set(\"password\", requestBody.password);",
+											"",
+											"    pm.expect(res.userID).to.be.a('string');",
+											"    pm.collectionVariables.set(\"userID\", res.userID);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Generate Token (Valid) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", () => {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"const res = pm.response.json();",
+											"",
+											"pm.test(\"Missing username and password error is returned\", () => {",
+											"    pm.expect(res).to.have.property(\"code\", \"1200\");",
+											"    pm.expect(res).to.have.property(\"message\", \"UserName and Password required.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    // Missing userName\n    \"password\": \"{{password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/GenerateToken",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"GenerateToken"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
+		},
+		{
+			"name": "Book Store API functionality",
+			"item": []
 		}
 	],
 	"variable": [
