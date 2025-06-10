@@ -46,7 +46,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userName\": \"fhemifehmi1\",\n  \"password\": \"fhemifehmi1!\"\n}"
+							"raw": "{\n  \"userName\": \"6102025Test1\",\n  \"password\": \"6102025Test1!\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/Account/v1/User",
@@ -89,13 +89,18 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "accept",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userName\": {{userName}},\n  \"password\": {{password}}\n}"
+							"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/Account/v1/GenerateToken",
@@ -119,15 +124,11 @@
 							{
 								"key": "accept",
 								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"userName\": \"fbaltaci_test5\",\r\n  \"password\": \"Fbaltaci_test5!\"\r\n}",
+							"raw": "{\r\n    \"userName\": \"{{userName}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -150,8 +151,81 @@
 					"response": []
 				},
 				{
+					"name": "GET User Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response has userId\", function () {\r",
+									"    pm.expect(jsonData).to.have.property(\"userId\");\r",
+									"    pm.expect(jsonData.userId).to.match(\r",
+									"        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i\r",
+									"    ); // UUID format\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Username is present and starts with 'user_'\", function () {\r",
+									"    pm.expect(jsonData).to.have.property(\"username\");\r",
+									"    pm.expect(jsonData.username).to.match(/^user_\\d+$/);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Books is an empty array\", function () {\r",
+									"    pm.expect(jsonData).to.have.property(\"books\");\r",
+									"    pm.expect(jsonData.books).to.be.an(\"array\").that.is.empty;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://bookstore.toolsqa.com/Account/v1/User/{{userID}}",
+							"protocol": "https",
+							"host": [
+								"bookstore",
+								"toolsqa",
+								"com"
+							],
+							"path": [
+								"Account",
+								"v1",
+								"User",
+								"{{userID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Delete User with Valid Token",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -160,7 +234,8 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{token}}"
+								"value": "Bearer {{token}}",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -223,6 +298,791 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Post Books for User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": \"{{userID}}\",\r\n    \"collectionOfIsbns\": [\r\n        {\r\n            \"isbn\": \"9781449325862\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/BookStore/v1/Books",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"BookStore",
+								"v1",
+								"Books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Details",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/BookStore/v1/Book?ISBN=9781449325862",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"BookStore",
+								"v1",
+								"Book"
+							],
+							"query": [
+								{
+									"key": "ISBN",
+									"value": "9781449325862"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book from User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"isbn\": \"9781449325862\",\r\n  \"userId\": \"{{userID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/BookStore/v1/Book",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"BookStore",
+								"v1",
+								"Book"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book List for User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": {{userID}},\r\n  \"isbn\": \"9781449331818\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/BookStore/v1/Books/9781449325862",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"BookStore",
+								"v1",
+								"Books",
+								"9781449325862"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login API Functionality",
+			"item": [
+				{
+					"name": "Successfully create a new user with valid credentials",
+					"item": [
+						{
+							"name": "Create User (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+											"pm.test(\"Response contains userID\", () => {",
+											"    const res = pm.response.json();",
+											"",
+											"    const requestBody = JSON.parse(pm.request.body.raw);",
+											"",
+											"    pm.collectionVariables.set(\"userName\", requestBody.userName);",
+											"    pm.collectionVariables.set(\"password\", requestBody.password);",
+											"",
+											"    pm.expect(res.userID).to.be.a('string');",
+											"    pm.collectionVariables.set(\"userID\", res.userID);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Generate Token (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has a valid token\", () => {",
+											"    const res = pm.response.json();",
+											"    pm.expect(res.token).to.be.a('string');",
+											"    pm.collectionVariables.set(\"token\", res.token);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/GenerateToken",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"GenerateToken"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET User Details",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Response has userId\", function () {\r",
+											"    pm.expect(jsonData).to.have.property(\"userId\");\r",
+											"    pm.expect(jsonData.userId).to.match(\r",
+											"        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i\r",
+											"    ); // UUID format\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Username is present and starts with 'user_'\", function () {\r",
+											"    pm.expect(jsonData).to.have.property(\"username\");\r",
+											"    pm.expect(jsonData.username).to.match(/^user_\\d+$/);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Books is an empty array\", function () {\r",
+											"    pm.expect(jsonData).to.have.property(\"books\");\r",
+											"    pm.expect(jsonData.books).to.be.an(\"array\").that.is.empty;\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://bookstore.toolsqa.com/Account/v1/User/{{userID}}",
+									"protocol": "https",
+									"host": [
+										"bookstore",
+										"toolsqa",
+										"com"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User",
+										"{{userID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Fail to create a user with a missing password",
+					"item": [
+						{
+							"name": "Given I generate a unique test username and an empty password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));",
+											"pm.test(\"Response contains userID\", () => {",
+											"    const responseBody = pm.response.json();",
+											"",
+											"    pm.expect(responseBody.code).to.be.a('string');",
+											"    pm.expect(responseBody.message).to.be.a('string');",
+											"",
+											"    pm.expect(responseBody.code).to.equal(\"1200\");",
+											"    pm.expect(responseBody.message).to.equal(\"UserName and Password required.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Fail to generate token with invalid password",
+					"item": [
+						{
+							"name": "Create User (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+											"pm.test(\"Response contains userID\", () => {",
+											"    const res = pm.response.json();",
+											"",
+											"    const requestBody = JSON.parse(pm.request.body.raw);",
+											"",
+											"    pm.collectionVariables.set(\"userName\", requestBody.userName);",
+											"    pm.collectionVariables.set(\"password\", requestBody.password);",
+											"",
+											"    pm.expect(res.userID).to.be.a('string');",
+											"    pm.collectionVariables.set(\"userID\", res.userID);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Generate Token (With Invalid Password)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const res = pm.response.json();",
+											"",
+											"if (res.status === \"Success\") {",
+											"    pm.test(\"Token is a non-empty string\", () => {",
+											"        pm.expect(res.token).to.be.a('string').that.is.not.empty;",
+											"    });",
+											"",
+											"    pm.collectionVariables.set(\"token\", res.token);",
+											"    pm.test(\"Token expiration exists\", () => {",
+											"        pm.expect(res.expires).to.be.a('string').that.is.not.empty;",
+											"    });",
+											"",
+											"} else {",
+											"    pm.test(\"Authorization failed\", () => {",
+											"        pm.expect(res.token).to.be.null;",
+											"        pm.expect(res.expires).to.be.null;",
+											"        pm.expect(res.status).to.eql(\"Failed\");",
+											"        pm.expect(res.result).to.eql(\"User authorization failed.\");",
+											"    });",
+											"}",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"invalidpassword\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/GenerateToken",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"GenerateToken"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Fail to retrieve user with invalid token",
+					"item": [
+						{
+							"name": "Create User (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+											"pm.test(\"Response contains userID\", () => {",
+											"    const res = pm.response.json();",
+											"",
+											"    const requestBody = JSON.parse(pm.request.body.raw);",
+											"",
+											"    pm.collectionVariables.set(\"userName\", requestBody.userName);",
+											"    pm.collectionVariables.set(\"password\", requestBody.password);",
+											"",
+											"    pm.expect(res.userID).to.be.a('string');",
+											"    pm.collectionVariables.set(\"userID\", res.userID);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate a unique username using timestamp\r",
+											"const timestamp = Date.now();\r",
+											"const uniqueUsername = `user_${timestamp}`;\r",
+											"const password = `Test${uniqueUsername}!`;\r",
+											"\r",
+											"// Set them as environment variables\r",
+											"pm.environment.set(\"userName\", uniqueUsername);\r",
+											"pm.environment.set(\"password\", password);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/User",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Generate Token (Valid)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has a valid token\", () => {",
+											"    const res = pm.response.json();",
+											"    pm.expect(res.token).to.be.a('string');",
+											"    pm.collectionVariables.set(\"token\", res.token);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userName\": \"{{userName}}\",\n  \"password\": \"{{password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/Account/v1/GenerateToken",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"GenerateToken"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET User Details (With Invalid Auth)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", () => {\r",
+											"    pm.response.to.have.status(401);\r",
+											"});\r",
+											"\r",
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Authorization failure response structure is valid\", () => {\r",
+											"    pm.expect(res).to.have.property(\"code\");\r",
+											"    pm.expect(res.code).to.eql(\"1200\");\r",
+											"\r",
+											"    pm.expect(res).to.have.property(\"message\");\r",
+											"    pm.expect(res.message).to.eql(\"User not authorized!\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer InvalidToken",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://bookstore.toolsqa.com/Account/v1/User/{{userID}}",
+									"protocol": "https",
+									"host": [
+										"bookstore",
+										"toolsqa",
+										"com"
+									],
+									"path": [
+										"Account",
+										"v1",
+										"User",
+										"{{userID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Fail to create a user with a password missing non-alphanumeric character",
+					"item": []
+				},
+				{
+					"name": "Fail to create a user with an already existing username",
+					"item": []
+				},
+				{
+					"name": "Fail to generate a token with missing password",
+					"item": []
+				},
+				{
+					"name": "Fail to generate a token with missing username",
+					"item": []
 				}
 			]
 		}
